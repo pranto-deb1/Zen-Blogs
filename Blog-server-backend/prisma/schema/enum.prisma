@@ -1,0 +1,15 @@
+enum ActiveStatus {
+    ACTIVE
+    INACTIVE
+}
+
+enum Role {
+    ADMIN
+    USER
+}
+
+enum PostStatus {
+    DRAFT
+    PUBLISHED
+    ARCHIVED
+}

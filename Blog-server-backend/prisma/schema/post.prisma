@@ -1,0 +1,16 @@
+model Post {
+    id String @id @default(uuid())
+    title String
+    content String
+    thumbnail String?
+    isFeatured Boolean @default(true)
+    status PostStatus @default(PUBLISHED)
+    tags String[]
+    views Int @default(0)
+    authorId String
+    user User @relation(fields: [authorId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    @@map("posts")
+}
+
