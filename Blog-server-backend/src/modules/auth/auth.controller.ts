@@ -7,6 +7,7 @@ import {
 } from "../../utility/responseHelpers/response";
 import { ServerError } from "../../utility/errorHelpers/errorHelpers";
 
+// create an user
 const createUser = async (req: Request, res: Response) => {
   try {
     const data = await AuthService.insertUser(req.body);
@@ -23,6 +24,28 @@ const createUser = async (req: Request, res: Response) => {
   }
 };
 
+// login and create profile
+const loginUser = async (req: Request, res: Response) => {
+  try {
+    const data = await AuthService.createProfileAndLogin(req.body);
+
+    res
+      .status(200)
+      .json(
+        ReturnSuccessResponse("Login successfull and created profile", data),
+      );
+  } catch (error) {
+    const err = error as AppError;
+
+    if (err.status) {
+      return res.status(err.status).json(ReturnErrorResponse(err.message));
+    }
+
+    return ServerError(res, error);
+  }
+};
+
 export const AuthController = {
   createUser,
+  loginUser,
 };

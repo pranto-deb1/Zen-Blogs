@@ -8,3 +8,8 @@ export interface AppError {
   message: string;
   status: number;
 }
+
+export interface ILoginUser {
+  email: string;
+  password: string;
+}
