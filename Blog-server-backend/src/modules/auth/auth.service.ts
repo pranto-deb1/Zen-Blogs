@@ -30,25 +30,21 @@ const insertUser = async (payload: ICreateUser) => {
     Number(config.bcrypt_salt_rounds),
   );
 
-  // creating user
+  // creating user and profile
   const createdUser = await prisma.user.create({
     data: {
       name,
       email,
       password: hashedPassword,
+      profile: {
+        create: {
+          bio: "This is your profile boi. you can change it any moment",
+          profilePhoto:
+            "https://img.magnific.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-2191.jpg?semt=ais_hybrid&w=740&q=80",
+        },
+      },
     },
   });
-
-  // creating profile
-  await prisma.profile.create({
-    data: {
-      userId: createdUser.id,
-      bio: "This is your profile boi. you can change it any moment",
-      profilePhoto:
-        "https://img.magnific.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-gender-neutral-silhouette-profile-picture-suitable-social-media-profiles-icons-screensavers-as-templatex9xa_719432-2191.jpg?semt=ais_hybrid&w=740&q=80",
-    },
-  });
-
 
   // joining user and profile
   const user = await prisma.user.findUnique({

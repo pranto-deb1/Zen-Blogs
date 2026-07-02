@@ -1,49 +1,26 @@
 import { Request, Response } from "express";
 import { AuthService } from "./auth.service";
-import { AppError } from "../../interfaces/auth.interfaces";
-import {
-  ReturnErrorResponse,
-  ReturnSuccessResponse,
-} from "../../utility/responseHelpers/response";
-import { ServerError } from "../../utility/errorHelpers/errorHelpers";
+import { ReturnSuccessResponse } from "../../utility/responseHelpers/response";
+import { CatchAsync } from "../../utility/catchAsync/catchAsync";
 
 // create an user
-const createUser = async (req: Request, res: Response) => {
-  try {
-    const data = await AuthService.insertUser(req.body);
-    res
-      .status(200)
-      .json(ReturnSuccessResponse("Successfully created user", data));
-  } catch (error) {
-    const err = error as AppError;
-    if (err.status) {
-      return res.status(err.status).json(ReturnErrorResponse(err.message));
-    }
 
-    return ServerError(res, error);
-  }
-};
+const createUser = CatchAsync(async (req: Request, res: Response) => {
+  const data = await AuthService.insertUser(req.body);
+  res
+    .status(200)
+    .json(ReturnSuccessResponse("Successfully created user", data));
+});
 
 // login and create profile
-const loginUser = async (req: Request, res: Response) => {
-  try {
-    const data = await AuthService.loginUser(req.body);
 
-    res
-      .status(200)
-      .json(
-        ReturnSuccessResponse("Login successfull and created profile", data),
-      );
-  } catch (error) {
-    const err = error as AppError;
+const loginUser = CatchAsync(async (req: Request, res: Response) => {
+  const data = await AuthService.loginUser(req.body);
 
-    if (err.status) {
-      return res.status(err.status).json(ReturnErrorResponse(err.message));
-    }
-
-    return ServerError(res, error);
-  }
-};
+  res
+    .status(200)
+    .json(ReturnSuccessResponse("Login successfull and created profile", data));
+});
 
 export const AuthController = {
   createUser,

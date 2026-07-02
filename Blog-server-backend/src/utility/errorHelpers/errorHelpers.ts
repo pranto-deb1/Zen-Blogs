@@ -1,5 +1,6 @@
 import { Response } from "express";
 import { AppError } from "../../interfaces/auth.interfaces";
+import { ReturnErrorResponse } from "../responseHelpers/response";
 
 export const CreateErrorRes = (message: string, status: number): AppError => {
   return {
@@ -8,10 +9,21 @@ export const CreateErrorRes = (message: string, status: number): AppError => {
   };
 };
 
-export const ServerError = <T>(res: Response, error?: T) => {
+const ServerError = <T>(res: Response, error?: T) => {
   return res.status(500).json({
     success: false,
     message: "internal server error",
-    error
+    error,
   });
+};
+
+export const CatchError = (error: unknown, res: Response) => {
+  // check if the error is a custom error
+  const err = error as AppError;
+  if (err.status) {
+    return res.status(err.status).json(ReturnErrorResponse(err.message));
+  }
+
+  // return default server 500 error
+  return ServerError(res, error);
 };
