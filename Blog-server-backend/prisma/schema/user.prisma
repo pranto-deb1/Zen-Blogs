@@ -9,5 +9,5 @@ model User {
     updatedAt    DateTime     @updatedAt
     profile      Profile?
     posts        Post[]
-    @@map("psers")
+    @@map("users")
 }

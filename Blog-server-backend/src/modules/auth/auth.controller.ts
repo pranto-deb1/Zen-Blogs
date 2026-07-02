@@ -27,7 +27,7 @@ const createUser = async (req: Request, res: Response) => {
 // login and create profile
 const loginUser = async (req: Request, res: Response) => {
   try {
-    const data = await AuthService.createProfileAndLogin(req.body);
+    const data = await AuthService.loginUser(req.body);
 
     res
       .status(200)

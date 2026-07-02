@@ -24,6 +24,7 @@ const insertUser = async (payload: ICreateUser) => {
     throw CreateErrorRes("User Already Exists", 409);
   }
 
+  // hash password
   const hashedPassword = await bcrypt.hash(
     password,
     Number(config.bcrypt_salt_rounds),
@@ -38,6 +39,7 @@ const insertUser = async (payload: ICreateUser) => {
     },
   });
 
+  // creating profile
   await prisma.profile.create({
     data: {
       userId: createdUser.id,
@@ -47,6 +49,8 @@ const insertUser = async (payload: ICreateUser) => {
     },
   });
 
+
+  // joining user and profile
   const user = await prisma.user.findUnique({
     where: {
       id: createdUser.id,
@@ -63,7 +67,7 @@ const insertUser = async (payload: ICreateUser) => {
 };
 
 // create profile and login user
-const createProfileAndLogin = async (payload: ILoginUser) => {
+const loginUser = async (payload: ILoginUser) => {
   const { email, password } = payload;
 
   // check if user exists
@@ -101,5 +105,5 @@ const createProfileAndLogin = async (payload: ILoginUser) => {
 
 export const AuthService = {
   insertUser,
-  createProfileAndLogin,
+  loginUser,
 };
