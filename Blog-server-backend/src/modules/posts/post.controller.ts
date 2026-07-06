@@ -10,7 +10,7 @@ const createPost = CatchAsync(async (req: Request, res: Response) => {
   // return success response
   res
     .status(200)
-    .json(ReturnSuccessResponse("Successfully created a post", data));
+    .json(ReturnSuccessResponse("Successfully created a post", 200, data));
 });
 
 export const PostController = {

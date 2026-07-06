@@ -1,10 +1,16 @@
 import { config } from "../../config";
-import { ICreateUser, ILoginUser } from "../../interfaces/auth.interfaces";
+import {
+  ICreateUser,
+  ILoginUser,
+  IUpdateUser,
+} from "../../interfaces/auth.interfaces";
 import { prisma } from "../../lib/prisma";
 import { CreateErrorRes } from "../../utility/errorHelpers/errorHelpers";
 import bcrypt from "bcrypt";
+import { jwtUtils } from "../../utility/jwt/jwt";
+import { JwtPayload } from "jsonwebtoken";
 
-// create user
+// create user and profile
 const insertUser = async (payload: ICreateUser) => {
   const { name, email, password } = payload;
 
@@ -62,44 +68,101 @@ const insertUser = async (payload: ICreateUser) => {
   return user;
 };
 
-// create profile and login user
+// login user
 const loginUser = async (payload: ILoginUser) => {
   const { email, password } = payload;
 
   // check if user exists
-  const findUser = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       email,
     },
   });
 
-  if (!findUser) {
+  if (!user) {
     throw CreateErrorRes("User not found", 404);
   }
 
-  const comparedPassword = await bcrypt.compare(password, findUser.password);
+  if (user.activeStatus === "INACTIVE") {
+    throw CreateErrorRes("User is inactive", 403);
+  }
+
+  const comparedPassword = await bcrypt.compare(password, user.password);
 
   // check user password
   if (!comparedPassword) {
     throw CreateErrorRes("Invalid Password", 403);
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: findUser.id,
-    },
-    omit: {
-      password: true,
-    },
-    include: {
-      profile: true,
-    },
-  });
+  // create jwt access and refresh token
+  const jwtPayload: JwtPayload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
 
-  return user;
+  const accessToken = jwtUtils.CreateToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in,
+  );
+
+  const refreshToken = jwtUtils.CreateToken(
+    jwtPayload,
+    config.jwt_refresh_secret,
+    config.jwt_refresh_expires_in,
+  );
+
+  return { accessToken, refreshToken };
 };
 
+// update user & profile
+const updateProfile = async (payload: IUpdateUser, userId: string) => {
+  const { name, email, bio, profilePhoto } = payload;
+
+  // create an object to hold the update data
+  const updateData: any = {};
+
+  // check if name, email, bio or profilePhoto is provided and add it to the updateData object
+  if (name) updateData.name = name;
+  if (email) {
+    const chekIfUserEmailExists = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (chekIfUserEmailExists && chekIfUserEmailExists.id !== userId) {
+      throw CreateErrorRes("Another user with this email already exists", 409);
+    }
+    updateData.email = email;
+  }
+  if (bio || profilePhoto) {
+    updateData.profile = {
+      update: {},
+    };
+    if (bio) updateData.profile.update.bio = bio;
+    if (profilePhoto) updateData.profile.update.profilePhoto = profilePhoto;
+  }
+
+  // update user and profile
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: updateData,
+    omit: { password: true },
+    include: { profile: true },
+  });
+
+  // return the updated user
+  return updatedUser;
+};
+
+// exporting the service functions
 export const AuthService = {
   insertUser,
   loginUser,
+  updateProfile,
 };

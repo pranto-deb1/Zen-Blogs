@@ -5,4 +5,4 @@ const router = Router();
 
 router.post("/create", PostController.createPost);
 
-export const PostsRouter = router;
+export const PostsRoute = router;
