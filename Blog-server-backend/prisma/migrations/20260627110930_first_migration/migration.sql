@@ -7,6 +7,9 @@ CREATE TYPE "Role" AS ENUM ('ADMIN', 'USER', 'AUTHOR');
 -- CreateEnum
 CREATE TYPE "PostStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
 
+-- CreateEnum
+-- CREATE TYPE "CommentStatus" AS ENUM ('APROVED', 'REJECTED');
+
 -- CreateTable
 CREATE TABLE "posts" (
     "id" TEXT NOT NULL,
@@ -49,6 +52,14 @@ CREATE TABLE "users" (
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
+
+-- --CreateTable
+-- CREATE TABLE "comments" (
+--     "id" TEXT NOT NULL,
+--     "content" TEXT,
+--     "authorId" TEXT NOT NULL,
+--     "postId" TEXT NOT NULL
+-- )
 
 -- CreateIndex
 CREATE UNIQUE INDEX "profiles_userId_key" ON "profiles"("userId");

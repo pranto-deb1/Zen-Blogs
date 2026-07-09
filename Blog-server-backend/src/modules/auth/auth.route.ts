@@ -12,5 +12,6 @@ router.put(
   auth([Role.USER, Role.ADMIN, Role.AUTHOR]),
   AuthController.updateUser,
 );
+router.post("/refresh-token", AuthController.refreshToken);
 
 export const AuthRoute = router;

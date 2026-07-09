@@ -64,9 +64,32 @@ const updateUser = CatchAsync(async (req: Request, res: Response) => {
     .json(ReturnSuccessResponse("Successfully updated user", 200, data));
 });
 
+// refresh token
+const refreshToken = CatchAsync(async (req: Request, res: Response) => {
+  const token = req.cookies.refreshToken;
+  // call auth service to generate token
+  const accessToken = await AuthService.refreshToken(token);
+
+  // set the to cookies
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24, // 24 hours
+  });
+
+  // send response
+  res.status(200).json(
+    ReturnSuccessResponse("Successfully refreshed token", 200, {
+      accessToken,
+    }),
+  );
+});
+
 // exporting the controller functions
 export const AuthController = {
   createUser,
   loginUser,
   updateUser,
+  refreshToken,
 };

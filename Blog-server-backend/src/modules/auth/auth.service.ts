@@ -9,6 +9,7 @@ import { CreateErrorRes } from "../../utility/errorHelpers/errorHelpers";
 import bcrypt from "bcrypt";
 import { jwtUtils } from "../../utility/jwt/jwt";
 import { JwtPayload } from "jsonwebtoken";
+import { ActiveStatus } from "../../../generated/prisma/enums";
 
 // create user and profile
 const insertUser = async (payload: ICreateUser) => {
@@ -160,9 +161,57 @@ const updateProfile = async (payload: IUpdateUser, userId: string) => {
   return updatedUser;
 };
 
+// generate new access token using refresh token
+const refreshToken = async (refreshToken: string) => {
+  // check if token exists
+  if (!refreshToken) {
+    throw CreateErrorRes("Refresh token is required", 401);
+  }
+
+  // verify the token
+  const verifiedToken = jwtUtils.VerifyToken(
+    refreshToken,
+    config.jwt_refresh_secret,
+  );
+
+  // find user and conform it exists
+  const { id } = verifiedToken;
+
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!user) {
+    throw CreateErrorRes("Could not find user", 404);
+  }
+
+  if (user.activeStatus !== ActiveStatus.ACTIVE) {
+    throw CreateErrorRes("Your account is not active.", 403);
+  }
+
+  // set up payload for jwt token
+  const jwtPayload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  // create access token
+  const accessToken = jwtUtils.CreateToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in,
+  );
+
+  // return token
+  return accessToken;
+};
+
 // exporting the service functions
 export const AuthService = {
   insertUser,
   loginUser,
   updateProfile,
+  refreshToken,
 };
