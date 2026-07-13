@@ -14,7 +14,7 @@ const getUser = CatchAsync(async (req: Request, res: Response) => {
 
   res
     .status(200)
-    .json(ReturnSuccessResponse("user fetched successfully", 200, data));
+    .json(ReturnSuccessResponse("user fetched successfully", data));
 });
 
 export const UsersController = {

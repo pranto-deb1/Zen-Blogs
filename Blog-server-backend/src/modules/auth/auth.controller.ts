@@ -14,7 +14,7 @@ const createUser = CatchAsync(async (req: Request, res: Response) => {
   // sending the response
   res
     .status(200)
-    .json(ReturnSuccessResponse("Successfully created user", 200, data));
+    .json(ReturnSuccessResponse("Successfully created user", data));
 });
 
 // login and create profile
@@ -39,7 +39,7 @@ const loginUser = CatchAsync(async (req: Request, res: Response) => {
 
   // sending the response
   res.status(200).json(
-    ReturnSuccessResponse("Login successfull and created profile", 200, {
+    ReturnSuccessResponse("Login successfull", {
       accessToken,
       refreshToken,
     }),
@@ -61,7 +61,7 @@ const updateUser = CatchAsync(async (req: Request, res: Response) => {
   // return the response
   res
     .status(200)
-    .json(ReturnSuccessResponse("Successfully updated user", 200, data));
+    .json(ReturnSuccessResponse("Successfully updated user", data));
 });
 
 // refresh token
@@ -80,7 +80,7 @@ const refreshToken = CatchAsync(async (req: Request, res: Response) => {
 
   // send response
   res.status(200).json(
-    ReturnSuccessResponse("Successfully refreshed token", 200, {
+    ReturnSuccessResponse("Successfully refreshed token", {
       accessToken,
     }),
   );

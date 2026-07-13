@@ -3,7 +3,7 @@ model Post {
     title      String
     content    String
     thumbnail  String?
-    isFeatured Boolean    @default(true)
+    isFeatured Boolean    @default(false)
     status     PostStatus @default(PUBLISHED)
     tags       String[]
     views      Int        @default(0)

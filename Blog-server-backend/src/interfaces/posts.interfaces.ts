@@ -1,8 +1,15 @@
-export interface CreatePost {
+export interface ICreatePost {
   title: string;
   content: string;
   thumbnail?: string;
-  isFeatured: boolean;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   tags: string[];
+}
+
+export interface IUpdateSinglePost {
+  title?: string;
+  content?: string;
+  thumbnail?: string;
+  status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  tags?: string[];
 }

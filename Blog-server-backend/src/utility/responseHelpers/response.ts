@@ -11,14 +11,10 @@ export const ReturnErrorResponse = <T>(
   };
 };
 
-export const ReturnSuccessResponse = <T>(
-  message: string,
-  status: number,
-  data?: T,
-) => {
+export const ReturnSuccessResponse = <T>(message: string, data?: T) => {
   return {
     success: true,
-    status,
+    status: 200,
     message,
     data,
   };
