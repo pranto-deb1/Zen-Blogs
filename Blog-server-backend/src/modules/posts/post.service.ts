@@ -8,6 +8,11 @@ import { CreateErrorRes } from "../../utility/errorHelpers/errorHelpers";
 
 // create single post
 const insertPost = async (payload: ICreatePost, authorId: string) => {
+  // check if payload exists
+  if (!payload) {
+    throw CreateErrorRes("request body is required", 400);
+  }
+
   const {
     title,
     content,
@@ -260,6 +265,10 @@ const updateSinglePost = async (
   userRole: string,
   payload: IUpdateSinglePost,
 ) => {
+  // check if payload exists
+  if (!payload) {
+    throw CreateErrorRes("request body is required", 400);
+  }
   // check if post exists
   const post = await prisma.post.findUnique({
     where: { id: postId },

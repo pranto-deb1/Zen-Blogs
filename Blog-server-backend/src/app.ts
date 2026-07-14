@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { AuthRoute } from "./modules/auth/auth.route";
 import { PostsRoute } from "./modules/posts/post.route";
 import { UsersRoute } from "./modules/users/users.route";
+import { CommentRoute } from "./modules/comments/comments.route";
 const app: Application = express();
 app.use(
   cors({
@@ -20,6 +21,7 @@ app.use(cookieParser());
 app.use("/api/auth", AuthRoute);
 app.use("/api/posts", PostsRoute);
 app.use("/api/users", UsersRoute);
+app.use("/api/comments", CommentRoute)
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World");
