@@ -1,3 +1,5 @@
+import { PostWhereInput } from "../../generated/prisma/models";
+
 export interface ICreatePost {
   title: string;
   content: string;
@@ -12,4 +14,12 @@ export interface IUpdateSinglePost {
   thumbnail?: string;
   status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   tags?: string[];
+}
+
+export interface IPostQuery extends PostWhereInput {
+  limit?: string;
+  page?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }

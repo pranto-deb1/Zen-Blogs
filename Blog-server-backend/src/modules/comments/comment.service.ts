@@ -10,7 +10,9 @@ import { CreateErrorRes } from "../../utility/errorHelpers/errorHelpers";
 // get all comments
 const getAllComments = async () => {
   // find comments
-  const result = await prisma.comment.findMany();
+  const result = await prisma.comment.findMany({
+    include: { post: { select: { id: true, title: true, views: true } } },
+  });
 
   // if there is no comments return error
   if (!result || result.length === 0) {
@@ -51,6 +53,7 @@ const createSingleComment = async (
       postId,
       authorId,
     },
+    include: { post: { select: { id: true, title: true, views: true } } },
   });
 
   return comment;
@@ -67,6 +70,7 @@ const getCommentsBuyAuthorId = async (authorId: string) => {
   // find and check comments. If there is no comment return error
   const comments = await prisma.comment.findMany({
     where: { authorId, status: CommentStatus.APROVED },
+    include: { post: { select: { id: true, title: true, views: true } } },
   });
 
   if (!comments || comments.length === 0) {
@@ -124,6 +128,7 @@ const updateSingleComment = async (
     data: {
       content: content,
     },
+    include: { post: { select: { id: true, title: true } } },
   });
 
   return updatedComment;
@@ -154,7 +159,11 @@ const deleteSingleComment = async (
 
 // get single comment by id
 const getSingleComment = async (commentId: string) => {
-  const comment = await prisma.comment.findUnique({ where: { id: commentId } });
+  // find comment by id
+  const comment = await prisma.comment.findUnique({
+    where: { id: commentId },
+    include: { post: { select: { id: true, title: true, views: true } } },
+  });
   // check if the comment exists
   if (!comment) {
     throw CreateErrorRes("comment not found", 404);

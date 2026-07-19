@@ -17,7 +17,7 @@ const createPost = CatchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllPosts = CatchAsync(async (req: Request, res: Response) => {
-  const data = await PostService.getAllPost();
+  const data = await PostService.getAllPost(req.query);
 
   res
     .status(200)

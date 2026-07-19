@@ -6,13 +6,7 @@ export const CatchAsync = (fn: RequestHandler) => {
     try {
       await fn(req, res, next);
     } catch (error) {
-      return CatchError(error, res);
+      return CatchError(error, req, res, next);
     }
   };
 };
-
-
-
-
-
-

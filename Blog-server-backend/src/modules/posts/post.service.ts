@@ -1,10 +1,13 @@
+import { title } from "node:process";
 import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
 import {
   ICreatePost,
+  IPostQuery,
   IUpdateSinglePost,
 } from "../../interfaces/posts.interfaces";
 import { prisma } from "../../lib/prisma";
 import { CreateErrorRes } from "../../utility/errorHelpers/errorHelpers";
+import { PostWhereInput } from "../../../generated/prisma/models";
 
 // create single post
 const insertPost = async (payload: ICreatePost, authorId: string) => {
@@ -55,6 +58,8 @@ const insertPost = async (payload: ICreatePost, authorId: string) => {
     throw CreateErrorRes("Author not found", 404);
   }
 
+  const insertTags = tags.map((tag) => tag.toLowerCase());
+
   // creating post and returning post with user
   const createdPost = await prisma.post.create({
     data: {
@@ -63,7 +68,7 @@ const insertPost = async (payload: ICreatePost, authorId: string) => {
       content,
       thumbnail,
       status,
-      tags,
+      tags: insertTags,
     },
     include: {
       user: {
@@ -76,21 +81,85 @@ const insertPost = async (payload: ICreatePost, authorId: string) => {
 };
 
 // get all posts
-const getAllPost = async () => {
-  // const query: any = {};
+const getAllPost = async (query: IPostQuery) => {
+  // destructacture all queries
+  const {
+    limit = 10,
+    page = 1,
+    search,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = query;
 
-  // if(payload){
-  //   if(payload.)
-  // }
+  // declare page skip system
+  const pageSkip = Number(limit) * (Number(page) - 1);
 
+  // declare "search term" and "and conditions"
+  let lowerSearch;
+  const andConditions: PostWhereInput[] = [];
+
+  // add search condition
+  if (search) {
+    // convert search term to lowercase for better search
+    lowerSearch = search.toLowerCase();
+    andConditions.push({
+      OR: [
+        { title: { contains: lowerSearch, mode: "insensitive" } },
+        { content: { contains: lowerSearch, mode: "insensitive" } },
+        {
+          user: {
+            name: { contains: lowerSearch, mode: "insensitive" },
+          },
+        },
+        { tags: { has: lowerSearch } },
+      ],
+    });
+  }
+
+  // add title filter
+  if (query.title) {
+    andConditions.push({
+      title: query.title,
+    });
+  }
+
+  // add content filter
+  if (query.content) {
+    andConditions.push({
+      content: query.content,
+    });
+  }
+
+  // add is featured filter
+  if (query.isFeatured) {
+    andConditions.push({
+      isFeatured: Boolean(query.isFeatured),
+    });
+  }
+
+  if (query.tags) {
+    andConditions.push({
+      tags: { hasSome: JSON.parse(query.tags as string) },
+    });
+  }
+
+  // get all post from db with filter pagination, search and filter
   const posts = await prisma.post.findMany({
+    where: {
+      AND: andConditions,
+    },
+    skip: pageSkip,
+    take: Number(limit),
+    orderBy: { [sortBy]: sortOrder },
     include: { user: { omit: { password: true } }, comment: true },
   });
 
+  // check if there are any posts
   if (posts.length === 0) {
     throw CreateErrorRes("No data found", 404);
   }
 
+  // returning all posts
   return posts;
 };
 
@@ -254,8 +323,8 @@ const deleteSinglePost = async (
     throw CreateErrorRes("You can only delete your post", 403);
   }
 
-  // delete and return data
-  return await prisma.post.delete({ where: { id: postId } });
+  // delete data
+  await prisma.post.delete({ where: { id: postId } });
 };
 
 // update single post
