@@ -1,5 +1,9 @@
 import { title } from "node:process";
-import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
+import {
+  CommentStatus,
+  PostStatus,
+  SubscriptionStatus,
+} from "../../../generated/prisma/enums";
 import {
   ICreatePost,
   IPostQuery,
@@ -22,6 +26,7 @@ const insertPost = async (payload: ICreatePost, authorId: string) => {
     thumbnail = "https://t3.ftcdn.net/jpg/02/68/55/60/360_F_268556012_c1WBaKFN5rjRxR2eyV33znK4qnYeKZjm.jpg",
     status,
     tags,
+    isPremium = false,
   } = payload;
 
   //   check if all data exists
@@ -52,10 +57,26 @@ const insertPost = async (payload: ICreatePost, authorId: string) => {
     where: {
       id: authorId,
     },
+    include: {
+      subscription: true,
+    },
   });
 
   if (!searchUser) {
     throw CreateErrorRes("Author not found", 404);
+  }
+
+  // check if the author is eligible to create premium content
+  if (isPremium === true) {
+    if (
+      !searchUser.subscription ||
+      searchUser.subscription?.status !== SubscriptionStatus.ACTIVE
+    ) {
+      throw CreateErrorRes(
+        "sorry but you have to subscribe to create primum content",
+        403,
+      );
+    }
   }
 
   const insertTags = tags.map((tag) => tag.toLowerCase());
@@ -69,6 +90,7 @@ const insertPost = async (payload: ICreatePost, authorId: string) => {
       thumbnail,
       status,
       tags: insertTags,
+      isPremium,
     },
     include: {
       user: {
@@ -147,6 +169,7 @@ const getAllPost = async (query: IPostQuery) => {
   const posts = await prisma.post.findMany({
     where: {
       AND: andConditions,
+      isPremium: false,
     },
     skip: pageSkip,
     take: Number(limit),
@@ -160,25 +183,46 @@ const getAllPost = async (query: IPostQuery) => {
   }
 
   // returning all posts
-  return posts;
+  return {
+    data: { posts },
+    meta: {
+      page: Number(page),
+      limit: Number(limit),
+      total: posts.length,
+      pages: Math.ceil(posts.length / Number(limit)),
+    },
+  };
 };
 
 // get single post by id
-const getSinglePost = async (postId: string) => {
+const getSinglePost = async (postId: string, userId: string) => {
   // check if post exists
   const post = await prisma.post.findUnique({
     where: {
       id: postId,
+      isPremium: false,
     },
   });
 
+  // check if post exists
   if (!post) {
     throw CreateErrorRes("Post not found", 404);
   }
 
+  // if the post is premium, check if the user has an active subscription
+  if (post.isPremium) {
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId },
+    });
+
+    if (!subscription || subscription.status !== SubscriptionStatus.ACTIVE) {
+      throw CreateErrorRes("You need to subscribe to view this post", 403);
+    }
+  }
+
   // update and return post along user and comments
   const updatePost = await prisma.post.update({
-    where: { id: postId },
+    where: { id: postId, isPremium: false },
     data: {
       views: { increment: 1 },
     },
@@ -194,25 +238,6 @@ const getSinglePost = async (postId: string) => {
   if (!updatePost) {
     throw CreateErrorRes("Faild to update post", 500);
   }
-
-  // const result = await prisma.$transaction(async (tx) => {
-  //   const updatePost = await tx.post.update({
-  //     where: { id: postId },
-  //     data: { views: { increment: 1 } },
-  //   });
-  //   if (!updatePost) {
-  //     throw CreateErrorRes("update faild", 400);
-  //   }
-  //   const getPost = await tx.post.findUniqueOrThrow({
-  //     where: { id: postId },
-  //     include: {
-  //       user: { omit: { password: true } },
-  //       comment: { where: { status: CommentStatus.APROVED } },
-  //     },
-  //   });
-
-  //   return getPost;
-  // });
 
   return updatePost;
 };
@@ -350,6 +375,15 @@ const updateSinglePost = async (
   // check if the current user is the author of the post or he/she is the admin
   if (post.authorId !== userId && userRole !== "ADMIN") {
     throw CreateErrorRes("You don't have permission to update this post", 401);
+  }
+
+  if (post.isPremium) {
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId },
+    });
+
+    if (subscription) {
+    }
   }
 
   // manage the payload data

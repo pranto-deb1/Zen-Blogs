@@ -5,6 +5,7 @@ model Post {
     thumbnail  String?
     isFeatured Boolean    @default(false)
     status     PostStatus @default(PUBLISHED)
+    isPremium  Boolean    @default(false)
     tags       String[]
     views      Int        @default(0)
     authorId   String

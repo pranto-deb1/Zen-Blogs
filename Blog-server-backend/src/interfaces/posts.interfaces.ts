@@ -6,6 +6,7 @@ export interface ICreatePost {
   thumbnail?: string;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   tags: string[];
+  isPremium?: boolean;
 }
 
 export interface IUpdateSinglePost {

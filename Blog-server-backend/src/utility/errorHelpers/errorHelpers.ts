@@ -40,7 +40,7 @@ export const notFound = (req: Request, res: Response) => {
     status: 404,
     message: "Page not found",
     path: req.originalUrl,
-    date: Date(),
+    date: new Date(),
   });
 };
 
