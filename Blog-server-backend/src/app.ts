@@ -8,7 +8,6 @@ import { UsersRoute } from "./modules/users/users.route";
 import { CommentRoute } from "./modules/comments/comments.route";
 import { globalError, notFound } from "./utility/errorHelpers/errorHelpers";
 import { SubscriptionRoute } from "./modules/subscription/subscription.route";
-import { stripe } from "./lib/stripe";
 import { premiumRoute } from "./modules/premium/premium.route";
 
 const app: Application = express();

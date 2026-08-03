@@ -2,6 +2,7 @@ import { title } from "node:process";
 import {
   CommentStatus,
   PostStatus,
+  Role,
   SubscriptionStatus,
 } from "../../../generated/prisma/enums";
 import {
@@ -69,8 +70,9 @@ const insertPost = async (payload: ICreatePost, authorId: string) => {
   // check if the author is eligible to create premium content
   if (isPremium === true) {
     if (
-      !searchUser.subscription ||
-      searchUser.subscription?.status !== SubscriptionStatus.ACTIVE
+      (!searchUser.subscription ||
+        searchUser.subscription?.status !== SubscriptionStatus.ACTIVE) &&
+      searchUser.role !== Role.ADMIN
     ) {
       throw CreateErrorRes(
         "sorry but you have to subscribe to create primum content",
@@ -184,13 +186,13 @@ const getAllPost = async (query: IPostQuery) => {
 
   // returning all posts
   return {
-    data: { posts },
     meta: {
       page: Number(page),
       limit: Number(limit),
       total: posts.length,
       pages: Math.ceil(posts.length / Number(limit)),
     },
+    data: { posts },
   };
 };
 
@@ -200,7 +202,6 @@ const getSinglePost = async (postId: string, userId: string) => {
   const post = await prisma.post.findUnique({
     where: {
       id: postId,
-      isPremium: false,
     },
   });
 
@@ -229,7 +230,7 @@ const getSinglePost = async (postId: string, userId: string) => {
     include: {
       user: { omit: { password: true } },
       comment: {
-        where: { status: CommentStatus.APROVED },
+        where: { status: CommentStatus.APPROVED },
         orderBy: { createdAt: "desc" },
       },
     },
@@ -247,6 +248,7 @@ const getPostStats = async () => {
   const transactionStats = await prisma.$transaction(async (tx) => {
     const [
       totalPosts,
+      premiumPosts,
       getArchivedPosts,
       getDraftPosts,
       getPublishedPosts,
@@ -256,6 +258,7 @@ const getPostStats = async () => {
       postViewCounts,
     ] = await Promise.all([
       await tx.post.count(),
+      await tx.post.count({ where: { isPremium: true } }),
       await tx.post.count({
         where: {
           status: PostStatus.DRAFT,
@@ -275,7 +278,7 @@ const getPostStats = async () => {
       await tx.comment.count(),
 
       await tx.comment.count({
-        where: { status: CommentStatus.APROVED },
+        where: { status: CommentStatus.APPROVED },
       }),
 
       await tx.comment.count({
@@ -291,6 +294,7 @@ const getPostStats = async () => {
 
     return {
       totalPosts,
+      premiumPosts,
       getArchivedPosts,
       getDraftPosts,
       getPublishedPosts,
@@ -375,15 +379,6 @@ const updateSinglePost = async (
   // check if the current user is the author of the post or he/she is the admin
   if (post.authorId !== userId && userRole !== "ADMIN") {
     throw CreateErrorRes("You don't have permission to update this post", 401);
-  }
-
-  if (post.isPremium) {
-    const subscription = await prisma.subscription.findUnique({
-      where: { userId },
-    });
-
-    if (subscription) {
-    }
   }
 
   // manage the payload data

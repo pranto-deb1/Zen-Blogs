@@ -1,5 +1,3 @@
-import { json } from "body-parser";
-import { SubscriptionStatus } from "../../../generated/prisma/enums";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { IPostQuery } from "../../interfaces/posts.interfaces";
 import { prisma } from "../../lib/prisma";
@@ -76,10 +74,16 @@ const getPremium = async (query: IPostQuery) => {
     throw CreateErrorRes("no post found", 404);
   }
 
-  return posts;
+  return {
+    meta: {
+      page: Number(page),
+      limit: Number(limit),
+      total: posts.length,
+      pages: Math.ceil(posts.length / Number(limit)),
+    },
+    posts,
+  };
 };
-
-const SinglePremium = async (postId: string) => {};
 
 export const PremiumService = {
   getPremium,

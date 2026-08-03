@@ -37,8 +37,20 @@ const getSubscriptionStatus = CatchAsync(
   },
 );
 
+const cancelSubscription = CatchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const result = await SubscriptionService.cancelSubscription(
+    user?.id as string,
+  );
+
+  res
+    .status(200)
+    .json(ReturnSuccessResponse("Successfully canceled subscription", result));
+});
+
 export const SubscriptionController = {
   createCheckoutSession,
   handleWebHook,
   getSubscriptionStatus,
+  cancelSubscription,
 };

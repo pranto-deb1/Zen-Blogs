@@ -54,14 +54,14 @@ const createCheckoutSession = async (userId: string) => {
   return { paymemtUrl: transactionResult };
 };
 
-const handleWebhook = async (payload: Buffer, stgnature: string) => {
+const handleWebhook = async (payload: Buffer, signature: string) => {
   // get the stripe webhook end point secret from .env
   const endpointSecret = config.stripe_webhook_secret;
 
   // create and stripe event from req.body || payload
   const event = stripe.webhooks.constructEvent(
     payload,
-    stgnature,
+    signature,
     endpointSecret,
   );
 
@@ -103,7 +103,6 @@ const getSubscriptionStatus = async (userId: string) => {
     subscription.currentPeriodEnd &&
     new Date(subscription.currentPeriodEnd) > new Date();
 
-
   return {
     status: subscription.status,
     isSubscribed: isActive,
@@ -112,8 +111,34 @@ const getSubscriptionStatus = async (userId: string) => {
   };
 };
 
+const cancelSubscription = async (userId: string) => {
+  const subscription = await prisma.subscription.findUnique({
+    where: { userId },
+  });
+
+  if (!subscription) {
+    throw CreateErrorRes("sorry but you haven't subscribed yet", 404);
+  }
+
+  if (subscription.status !== SubscriptionStatus.ACTIVE) {
+    throw CreateErrorRes("you have no active subscription", 400);
+  }
+
+  await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+
+  return await prisma.subscription.update({
+    where: { userId },
+    data: {
+      status: SubscriptionStatus.CANCELED,
+      currentPeriodEnd: new Date(),
+    },
+    include: { user: { omit: { password: true } } },
+  });
+};
+
 export const SubscriptionService = {
   createCheckoutSession,
   handleWebhook,
   getSubscriptionStatus,
+  cancelSubscription,
 };

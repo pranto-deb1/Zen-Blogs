@@ -5,7 +5,7 @@ model Comment {
     author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
     postId    String
     post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
-    status    CommentStatus @default(APROVED)
+    status    CommentStatus @default(APPROVED)
     createdAt DateTime      @default(now())
     updatedAt DateTime      @updatedAt
 

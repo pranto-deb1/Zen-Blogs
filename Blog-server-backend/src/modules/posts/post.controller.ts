@@ -32,7 +32,7 @@ const getSinglePost = CatchAsync(async (req: Request, res: Response) => {
       .status(400)
       .json(ReturnErrorResponse("Post Id is required", 400));
   }
-  const data = await PostService.getSinglePost(postId);
+  const data = await PostService.getSinglePost(postId, req.user?.id as string);
 
   res
     .status(200)

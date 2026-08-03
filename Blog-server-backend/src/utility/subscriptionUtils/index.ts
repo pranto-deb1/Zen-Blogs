@@ -20,7 +20,7 @@ export const handleSubscriptionChange = async (
     payload.status === "active" || payload.status === "trialing"
       ? SubscriptionStatus.ACTIVE
       : payload.status === "canceled"
-        ? SubscriptionStatus.CANCLED
+        ? SubscriptionStatus.CANCELED
         : SubscriptionStatus.EXPIRED;
 
   // get time period and convert it into date
@@ -54,7 +54,7 @@ export const handleSubscriptionComplete = async (
     return console.log("Webhook failed", 400);
   }
 
-  // retrive subscription data from stripe
+  // retrieve subscription data from stripe
   const stripeSubscription =
     await stripe.subscriptions.retrieve(stripeSubscriptionId);
 

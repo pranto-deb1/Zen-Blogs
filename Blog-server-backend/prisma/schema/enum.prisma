@@ -16,12 +16,12 @@ enum PostStatus {
 }
 
 enum CommentStatus {
-    APROVED
+    APPROVED
     REJECTED
 }
 
 enum SubscriptionStatus {
     ACTIVE
-    CANCLED
+    CANCELED
     EXPIRED
 }
