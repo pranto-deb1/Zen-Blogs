@@ -2,7 +2,7 @@ import { Navbar } from "@/_components/nav";
 import { getMe } from "@/services/getMe";
 import React from "react";
 
-async function DashboardLayout({ children }: { children: React.ReactNode }) {
+async function BlogsLayout({ children }: { children: React.ReactNode }) {
   const user = await getMe();
   return (
     <div>
@@ -12,4 +12,4 @@ async function DashboardLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default DashboardLayout;
+export default BlogsLayout;

@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import ThemeProvider from "@/components/utils/themeProvider/themeProvider";
-import { NavigationMenu } from "@/components/ui/navigation-menu";
-import { NavigationMenuDemo } from "@/components/nav/nav";
+import ThemeProvider from "@/_components/utils/themeProvider/themeProvider";
+import { Toaster } from "sonner";
+import { Navbar } from "@/_components/nav";
+import { getMe } from "@/services/getMe";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -39,9 +40,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
-          <header>
-            <NavigationMenuDemo/>
-          </header>
+          <Toaster position="top-right" richColors />
+          <header></header>
           <main>{children}</main>
         </ThemeProvider>
       </body>

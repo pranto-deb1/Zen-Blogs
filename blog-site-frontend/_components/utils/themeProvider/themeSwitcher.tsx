@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/_components/ui/button";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 

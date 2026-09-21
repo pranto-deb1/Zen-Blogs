@@ -69,7 +69,7 @@ const getCommentsBuyAuthorId = async (authorId: string) => {
 
   // find and check comments. If there is no comment return error
   const comments = await prisma.comment.findMany({
-    where: { authorId, status: CommentStatus.APROVED },
+    where: { authorId, status: CommentStatus.APPROVED },
     include: { post: { select: { id: true, title: true, views: true } } },
   });
 
@@ -185,7 +185,7 @@ const moderateComment = async (
   // check if the status value is valid
   const { status } = payload;
 
-  if (status !== CommentStatus.APROVED && status !== CommentStatus.REJECTED) {
+  if (status !== CommentStatus.APPROVED && status !== CommentStatus.REJECTED) {
     throw CreateErrorRes("status must be APROVED or REJECTED", 400);
   }
 

@@ -3,7 +3,7 @@
     "module": "ESNext",
     "outDir": "./dist",
     "moduleResolution": "bundler",
-    "target": "ES2023",
+    "target": "esnext",
     "types": ["node"],
     "strict": true,
     "sourceMap": true,
