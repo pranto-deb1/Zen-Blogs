@@ -2,31 +2,29 @@
 
 import { cookies } from "next/headers";
 
+export const getNewAccessToken = async () => {
+  const cookieStore = await cookies();
 
-export const refreshToken = async () => {
-  const cookieStore = cookies();
-
-  const Token = (await cookieStore).get("refreshToken")?.value;
+  const Token = cookieStore.get("refreshToken")?.value || null;
+  console.log(Token);
 
   if (!Token) {
     return {
       success: false,
-      message: "user is not logged in",
+      message: "refresh token not found",
     };
   }
 
-  const res = await fetch(`${process.env.BACKEND_API_URL}/api/users/me`, {
-    method: "GET",
-    headers: {
-      Authorization: `${refreshToken}`,
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/auth/refresh-token`,
+    {
+      method: "POST",
+      headers: {
+        Cookie: `refreshToken=${Token}`,
+      },
+      cache: "no-cache",
     },
-
-    cache: "force-cache",
-    next: {
-      revalidate: 60 * 60 * 24,
-      tags: ["my-profile"],
-    },
-  });
+  );
 
   return res.json();
 };

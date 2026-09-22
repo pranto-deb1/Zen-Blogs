@@ -2,6 +2,8 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtUtils } from "./_components/utils/jtw";
+import { getNewAccessToken } from "./services/refreshToken";
+import { cookies } from "next/headers";
 
 // This function can be marked `async` if using `await` inside
 const authRoutes = ["/login", "/register"];
@@ -9,17 +11,49 @@ const publicRoutes = ["/", "/news"];
 
 export async function proxy(request: NextRequest) {
   const pathName = request.nextUrl.pathname;
+  const cookieStore = await cookies();
 
-  const accessToken = request.cookies.get("accessToken")?.value as string;
+  let accessToken = request.cookies.get("accessToken")?.value as string;
+  const refreshToken = request.cookies.get("refreshToken")?.value as string;
 
-  const decodedToken = accessToken
+  let decodedToken = accessToken
     ? jwtUtils.VerifyToken(accessToken, process.env.JWT_ACCESS_SECRET as string)
     : null;
   let userRole = null;
 
-  if (decodedToken) {
-    userRole = decodedToken.role;
-    console.log(userRole)
+  const decodedRefreshToken = refreshToken
+    ? jwtUtils.VerifyToken(
+        refreshToken,
+        process.env.JWT_REFRESH_SECRET as string,
+      )
+    : null;
+
+  if (
+    (!accessToken || !decodedToken?.success) &&
+    decodedRefreshToken?.success
+  ) {
+    const result = await getNewAccessToken();
+
+    if (result.success) {
+      const newAccessToken = result.data.accessToken;
+
+      cookieStore.set("accessToken", newAccessToken, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 24,
+        sameSite: "lax",
+      });
+      accessToken = newAccessToken;
+      decodedToken = accessToken
+        ? jwtUtils.VerifyToken(
+            accessToken,
+            process.env.JWT_ACCESS_SECRET as string,
+          )
+        : null;
+    }
+  }
+
+  if (decodedToken?.success && decodedToken.data) {
+    userRole = decodedToken.data.role;
   }
 
   if (accessToken && authRoutes.includes(pathName)) {
