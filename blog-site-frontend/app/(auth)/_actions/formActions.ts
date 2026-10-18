@@ -14,6 +14,29 @@ interface LoginState {
   };
 }
 
+export interface IRegisterState {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: {
+    id: string;
+    name: string;
+    email: string;
+    activeStatus: string;
+    role: string;
+    createdAt: string;
+    updatedAt: string;
+    profile: {
+      id: string;
+      userId: string;
+      profilePhoto: string;
+      bio: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  };
+}
+
 export const loginAction = async (
   previousData: LoginState,
   formData: FormData,
@@ -55,14 +78,62 @@ export const loginAction = async (
 
     const decodedToken = jwt.decode(resultData.data.accessToken) as JwtPayload;
     if (decodedToken.role === "ADMIN") {
-      redirect("/admin-dashboard", "replace");
+      redirect("/adminDashboard", "replace");
     } else if (decodedToken.role === "AUTHOR") {
-      redirect("/author-dashboard", "replace");
+      redirect("/authorDashboard", "replace");
     } else if (decodedToken.role === "USER") {
       redirect("/dashboard", "replace");
     }
-
   }
 
   return result;
+};
+
+export const registerAction = async (
+  previousData: IRegisterState,
+  formData: FormData,
+) => {
+  const password = formData.get("password");
+  const conformPassword = formData.get("conformPassword");
+  const firstName = formData.get("firstName");
+  const lastName = formData.get("lastName");
+  const email = formData.get("email");
+
+  const name = lastName ? `${firstName} ${lastName}` : String(firstName ?? "");
+
+  if (password !== conformPassword) {
+    return {
+      success: false,
+      status: 400,
+      message: "Password didn't match with confirm password field",
+    };
+  }
+
+  const payload = { name, email, password };
+
+  const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    // return {
+    // success: true,
+    // status: res.status,
+    // message: result.message ?? "Registered successfully",
+    // data: result.data,
+    // };
+    // console.log(result.data);
+
+    redirect("/login", "replace");
+  }
+
+  return {
+    success: false,
+    status: res.status,
+    message: result.message ?? "Registration failed",
+  };
 };

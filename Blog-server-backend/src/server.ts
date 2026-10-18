@@ -12,7 +12,7 @@ async function main() {
   } catch (error) {
     await prisma.$disconnect();
     console.error("Error starting the server:", error);
-    process.exit(1); // Exit the process with an error code
+    process.exit(1);
   }
 }
 main();

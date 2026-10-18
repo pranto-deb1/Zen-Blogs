@@ -34,7 +34,6 @@ export const auth = (roles: string[]) => {
         .json(CreateErrorRes("Unauthorized. Please login", 401));
     }
 
-
     const verifiedToken = jwtUtils.VerifyToken(token, config.jwt_access_secret);
 
     const { id, name, email, role } = verifiedToken;

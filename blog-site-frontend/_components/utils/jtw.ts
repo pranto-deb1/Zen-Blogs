@@ -1,5 +1,7 @@
 import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 
+
+
 const VerifyToken = (token: string, secret: string) => {
   try {
     const decoded = jwt.verify(token, secret) as JwtPayload;
@@ -17,6 +19,8 @@ const VerifyToken = (token: string, secret: string) => {
     };
   }
 };
+
+
 
 export const jwtUtils = {
   VerifyToken,

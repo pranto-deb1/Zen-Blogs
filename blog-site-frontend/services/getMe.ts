@@ -12,7 +12,7 @@ export const getMe = async () => {
       success: false,
       message: "user is not logged in",
     };
-  }
+  } 
 
   const res = await fetch(`${process.env.BACKEND_API_URL}/api/users/me`, {
     method: "GET",

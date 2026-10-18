@@ -15,12 +15,12 @@ import { ActiveStatus } from "../../../generated/prisma/enums";
 const insertUser = async (payload: ICreateUser) => {
   const { name, email, password } = payload;
 
-  // check if all data is there properly
+  // // check if all data is there properly
   if (!name || !email || !password) {
     throw CreateErrorRes("Please Enter name, email, password", 401);
   }
 
-  // check if user already exists
+  // // check if user already exists
   const isUserExists = await prisma.user.findUnique({
     where: {
       email,
@@ -37,7 +37,7 @@ const insertUser = async (payload: ICreateUser) => {
     Number(config.bcrypt_salt_rounds),
   );
 
-  // creating user and profile
+  // // creating user and profile
   const createdUser = await prisma.user.create({
     data: {
       name,
@@ -89,6 +89,8 @@ const loginUser = async (payload: ILoginUser) => {
   }
 
   const comparedPassword = await bcrypt.compare(password, user.password);
+
+
 
   // check user password
   if (!comparedPassword) {

@@ -60,9 +60,9 @@ export async function proxy(request: NextRequest) {
     if (userRole === "USER") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     } else if (userRole === "ADMIN") {
-      return NextResponse.redirect(new URL("/admin-dashboard", request.url));
+      return NextResponse.redirect(new URL("/adminDashboard", request.url));
     } else if (userRole === "AUTHOR") {
-      return NextResponse.redirect(new URL("/author-dashboard", request.url));
+      return NextResponse.redirect(new URL("/authorDashboard", request.url));
     } else {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -79,27 +79,28 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (accessToken) {
-    if (pathName.startsWith("/admin-dashboard") && userRole !== "ADMIN") {
+  if (decodedToken?.success) {
+
+    if (pathName.startsWith("/adminDashboard") && userRole !== "ADMIN") {
       if (userRole === "AUTHOR") {
-        return NextResponse.redirect(new URL("/author-dashboard", request.url));
+        return NextResponse.redirect(new URL("/authorDashboard", request.url));
       } else {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     } else if (
-      pathName.startsWith("/author-dashboard") &&
+      pathName.startsWith("/authorDashboard") &&
       userRole !== "AUTHOR"
     ) {
       if (userRole === "ADMIN") {
-        return NextResponse.redirect(new URL("/admin-dashboard", request.url));
+        return NextResponse.redirect(new URL("/adminDashboard", request.url));
       } else {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     } else if (pathName.startsWith("/dashboard") && userRole !== "USER") {
       if (userRole === "ADMIN") {
-        return NextResponse.redirect(new URL("/admin-dashboard", request.url));
+        return NextResponse.redirect(new URL("/adminDashboard", request.url));
       } else {
-        return NextResponse.redirect(new URL("/author-dashboard", request.url));
+        return NextResponse.redirect(new URL("/authorDashboard", request.url));
       }
     }
   }

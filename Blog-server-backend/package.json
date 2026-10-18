@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "stripe:webhook": "stripe listen --forward-to localhost:5000/api/subscription/webhook",
+    "stripe:webhook": "stripe listen --all-snapshot --forward-to localhost:5000/api/subscription/webhook",
     "build": "tsup src/server.ts --format esm --out-dir dist --clean",
     "start": "node dist/server.js"
   },
@@ -39,6 +39,6 @@
     "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.22.0",
-    "stripe": "^22.3.2"
+    "stripe": "^22.6.2"
   }
 }

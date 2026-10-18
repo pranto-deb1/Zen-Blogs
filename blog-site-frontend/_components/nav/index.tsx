@@ -30,7 +30,7 @@ import { Button } from "../ui/button";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Explore", href: "/blogs" },
+  { label: "Explore", href: "/news" },
   { label: "About", href: "/about" },
 ];
 
@@ -64,8 +64,8 @@ export function Navbar({ user }: { user: NavbarProps }) {
 
   let dashboardLink;
 
-  if (user.data?.role === "ADMIN") dashboardLink = "/admin-dashboard";
-  if (user.data?.role === "AUTHOR") dashboardLink = "/author-dashboard";
+  if (user.data?.role === "ADMIN") dashboardLink = "/adminDashboard";
+  if (user.data?.role === "AUTHOR") dashboardLink = "/authorDashboard";
   if (user.data?.role === "USER") dashboardLink = "/dashboard";
 
   // const router = useRouter();

@@ -6,6 +6,7 @@ import { loginAction } from "../_actions/formActions";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import Link from "next/link";
 
 function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, false);
@@ -26,8 +27,6 @@ function LoginForm() {
   useEffect(() => {
     if (isLoggedIn) {
       toast.success(state.message || "successfully logged in");
-
-
     }
   }, [isLoggedIn]);
 
@@ -57,6 +56,13 @@ function LoginForm() {
         </div>
         <Button type="submit">{pending ? "pending..." : "Login"}</Button>
       </Card>
+
+      <div className="flex justify-between mt-5 px-3">
+        <p className="">Already have an account?</p>{" "}
+        <Link href={"/register"} className="hover:underline">
+          Register
+        </Link>
+      </div>
     </form>
   );
 }

@@ -51,7 +51,7 @@ const createCheckoutSession = async (userId: string) => {
     return session.url;
   });
 
-  return { paymemtUrl: transactionResult };
+  return { paymentUrl: transactionResult };
 };
 
 const handleWebhook = async (payload: Buffer, signature: string) => {
